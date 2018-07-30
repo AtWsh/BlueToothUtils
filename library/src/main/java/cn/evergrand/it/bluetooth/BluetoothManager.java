@@ -80,6 +80,32 @@ public class BluetoothManager {
     }
 
     /**
+     * 开启蓝牙
+     * @return true to indicate adapter startup has begun, or false on
+     *         immediate error
+     */
+    public boolean openBlueTooth() {
+        if (mClient == null) {
+            return false;
+        }
+
+        //看开启的源码，可以直接开启，不用做是否已经开启蓝牙的判断
+        return mClient.openBluetooth();
+    }
+
+    /**
+     * 判断蓝牙是否已经开启
+     */
+    public boolean isBluetoothOpened() {
+        if (mClient == null) {
+            return false;
+        }
+
+        //看开启的源码，可以直接开启，不用做是否已经开启蓝牙的判断
+        return mClient.isBluetoothOpened();
+    }
+
+    /**
      * 尝试开启蓝牙，在连接蓝牙，没开启蓝牙时，优先开启
      */
     private void tryOpenBle(final SearchResponse searchResponse) {
@@ -177,6 +203,10 @@ public class BluetoothManager {
             return;
         }
 
+        if(!mClient.isBluetoothOpened()) { //没打开蓝牙
+            connectResponse.onResponse(BlueToothConstants.BLUETOOTH_DISABLED, null);
+            return;
+        }
         if (result.isBleDevice) {
             connectBle(result.device, connectResponse);
         }else {
@@ -376,14 +406,11 @@ public class BluetoothManager {
             return;
         }
         byte[] value = writeParams.getValue();
-        if (encryAndDecry != null) {
-            value = encryAndDecry.encrypt(value);
-        }
         String mac = writeParams.getMac();
         UUID serviceUUID = writeParams.getServiceUUID();
         UUID characterUUID = writeParams.getCharacterUUID();
-        boolean needParseAndPacking = writeParams.isNeedParseAndPacking();
         int type = writeParams.getDataType();
+        boolean needParseAndPacking = writeParams.isNeedParseAndPacking();
         BleWriteResponse response = writeParams.getResponse();
         response.setNeedParseAndPacking(needParseAndPacking);
         if (encryAndDecry != null) {
