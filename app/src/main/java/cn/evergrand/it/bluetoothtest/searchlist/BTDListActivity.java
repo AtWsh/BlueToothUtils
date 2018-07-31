@@ -468,4 +468,22 @@ public class BTDListActivity extends AppCompatActivity {
 
     }
 
+    public void openBlueTooth() {
+
+        //开启蓝牙
+        BluetoothManager.getInstance().openBlueTooth();
+
+    }
+
+    /**
+     * 判断蓝牙是否已经开启
+     */
+    public boolean isBluetoothOpened() {
+
+        //判断蓝牙是否已经开启
+        boolean opened = BluetoothManager.getInstance().isBluetoothOpened();
+
+        return opened;
+    }
+
 }

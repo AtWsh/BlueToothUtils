@@ -33,8 +33,8 @@ public class DataUtils {
             return value;
         }else if (decrypt == null) { //只做解析处理
             return DataUtils.realParseData(value);
-        }else if (decrypt != null) {//解密后，解析
-            return DataUtils.decryAndParse(value, decrypt);
+        }else if (decrypt != null) {//先解析，后解密
+            return DataUtils.parseAndDecry(value, decrypt);
         }
 
         return value;
@@ -60,7 +60,7 @@ public class DataUtils {
         }else if (encryAndDecry == null) { //封装处理
             return DataUtils.realPackingData(value,type);
         } else if (encryAndDecry != null) {//先加密再封装
-            return encryAndDecry.encrypt(DataUtils.realPackingData(value,type));
+            return DataUtils.realPackingData(encryAndDecry.encrypt(value),type);
         }
 
         return value;
@@ -87,13 +87,13 @@ public class DataUtils {
      * 解析然后解密
      * @return
      */
-    private static byte[] decryAndParse(byte[] data, IBlueToothDecrypt decrypt) {
+    private static byte[] parseAndDecry(byte[] data, IBlueToothDecrypt decrypt) {
         if (data == null || decrypt == null) {
             return null;
         }
 
-        byte[] decryData = decrypt.decrypt(data);
-        return realParseData(decryData);
+        byte[] parseData = realParseData(data);
+        return decrypt.decrypt(parseData);
     }
 
     /**
