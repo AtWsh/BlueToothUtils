@@ -124,17 +124,17 @@ public class DataUtils {
         if (data == null || data.length < 12) {
             return null;
         }
-        byte[] newData = ByteUtils.subBytes(data, 6, data.length - 11);
+        byte[] newData = ByteUtils.subBytes(data, 6, data.length - 10);
         return newData;
     }
 
     /**
      *
-     * @param data 根据协定的数据格式，返回的数据长度必须 > 11 否则认为数据无效
+     * @param data 根据协定的数据格式，返回的数据长度必须 >= 10 否则认为数据无效
      * @return
      */
     private static boolean checkLegal(byte[] data) {
-        if (data == null || data.length < 12) {
+        if (data == null || data.length < 10) {
             return false;
         }
 
@@ -147,8 +147,8 @@ public class DataUtils {
         if (data.length != lenForCheck) { //数据长度验证失败
             return false;
         }
-        byte sumData = (byte) sumData(data, data.length - 2);
-        byte sumPosData = data[data.length - 2];
+        byte sumData = (byte) sumData(data, data.length - 1);
+        byte sumPosData = data[data.length - 1];
         if (sumData != sumPosData) { //叠加和验证失败，数据不合法解析失败
             return false;
         }
@@ -166,13 +166,20 @@ public class DataUtils {
             return null;
         }
         int oldLength = oldData.length;
-        byte[] newData = new byte[oldLength + 4];
+        byte[] newData = new byte[oldLength + 10];
+        int newLength = newData.length;
         newData[0] = sHead;
-        newData[1] = (byte) (newData.length);
+        newData[1] = (byte) (newLength);
         newData[2] = (byte) type;
-        for (int i = 3; i < newData.length; i++) {
+        newData[3] = 0;
+        newData[4] = 0;
+        newData[5] = 0;
+        for (int i = 6; i < newData.length; i++) {
             newData[i] =  oldData[i - 1];
         }
+        newData[newLength - 4] = 0;
+        newData[newLength - 3] = 0;
+        newData[newLength - 2] = 0;
         return newData;
     }
 
