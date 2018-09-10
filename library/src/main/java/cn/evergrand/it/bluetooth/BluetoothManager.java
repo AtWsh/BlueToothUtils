@@ -318,11 +318,9 @@ public class BluetoothManager {
         UUID serviceUUID = blueToothNotifyParams.getServiceUUID();
         UUID characterUUID = blueToothNotifyParams.getCharacterUUID();
         BleNotifyResponse response = blueToothNotifyParams.getResponse();
-        if (decrypt != null) {
-            response.setBlueToothDecrypt(decrypt);
-        }
+        boolean isNeedParseAndPacking = blueToothNotifyParams.isNeedParseAndPacking();
         if (mClient != null) {
-            mClient.notify(mac, serviceUUID, characterUUID, response);
+            mClient.notify(mac, serviceUUID, characterUUID, response, isNeedParseAndPacking, decrypt);
         }
     }
 
@@ -375,11 +373,9 @@ public class BluetoothManager {
         UUID serviceUUID = blueToothReadParams.getServiceUUID();
         UUID characterUUID = blueToothReadParams.getCharacterUUID();
         BleReadResponse response = blueToothReadParams.getResponse();
-        if (decrypt != null) {
-            response.setBlueToothDecrypt(decrypt);
-        }
+        boolean isNeedParseAndPacking = blueToothReadParams.isNeedParseAndPacking();
         if (mClient != null) {
-            mClient.read(mac, serviceUUID, characterUUID, response);
+            mClient.read(mac, serviceUUID, characterUUID, response, isNeedParseAndPacking, decrypt);
         }
     }
 
@@ -412,10 +408,6 @@ public class BluetoothManager {
         int type = writeParams.getDataType();
         boolean needParseAndPacking = writeParams.isNeedParseAndPacking();
         BleWriteResponse response = writeParams.getResponse();
-        response.setNeedParseAndPacking(needParseAndPacking);
-        if (encryAndDecry != null) {
-            response.setBlueToothDecrypt(encryAndDecry);
-        }
 
         byte[] realValue = DataUtils.packingData(value, needParseAndPacking, type , encryAndDecry);
         int length = realValue.length;
@@ -431,7 +423,7 @@ public class BluetoothManager {
                         (length - (i + 1) * 20) > 0 ? 20 : 20 - ((i + 1) * 20 - length));
             }
             mClient.write(mac, serviceUUID, characterUUID,
-                    data, response);
+                    data, response, needParseAndPacking, encryAndDecry);
         }
     }
 

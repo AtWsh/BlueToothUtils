@@ -336,7 +336,8 @@ public class BTDListActivity extends AppCompatActivity {
 
     public void notify(String mac, UUID serviceUUID, UUID characterUUID, BleNotifyResponse response) {
 
-        BlueToothNotifyParams blueToothNotifyParams = new BlueToothNotifyParams(mac, serviceUUID, characterUUID, response);
+        BlueToothNotifyParams blueToothNotifyParams = new BlueToothNotifyParams(mac, serviceUUID,
+                characterUUID, true,response);
         BluetoothManager.getInstance().notify(blueToothNotifyParams);
 
         BluetoothManager.getInstance().notify(blueToothNotifyParams, new IBlueToothDecrypt() {
@@ -350,7 +351,7 @@ public class BTDListActivity extends AppCompatActivity {
 
     }
 
-    private BleNotifyResponse mBleNotifyResponse = new BleNotifyResponse(true) {
+    private BleNotifyResponse mBleNotifyResponse = new BleNotifyResponse() {
         @Override
         public void onNotify(UUID service, UUID character, byte[] value) {
 
@@ -384,7 +385,7 @@ public class BTDListActivity extends AppCompatActivity {
     public void read(String mac, UUID serviceUUID, UUID characterUUID, BleReadResponse response) {
 
         BlueToothReadParams blueToothReadParams = new BlueToothReadParams(mac, serviceUUID,
-                characterUUID, mReadRsp);
+                characterUUID, true, mReadRsp);
         BluetoothManager.getInstance().read(blueToothReadParams);
 
 
@@ -398,7 +399,7 @@ public class BTDListActivity extends AppCompatActivity {
 
     }
 
-    private BleReadResponse mReadRsp = new BleReadResponse(true) {
+    private BleReadResponse mReadRsp = new BleReadResponse() {
         @Override
         public void onResponse(int code, byte[] data) {
             if (code == BlueToothConstants.REQUEST_SUCCESS) {

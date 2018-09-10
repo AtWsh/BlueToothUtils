@@ -28,12 +28,14 @@ import cn.evergrand.it.bluetooth.connect.listener.BluetoothStateListener;
 import cn.evergrand.it.bluetooth.connect.options.ConnectOptions;
 import cn.evergrand.it.bluetooth.connect.response.BleMtuResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleNotifyResponse;
+import cn.evergrand.it.bluetooth.connect.response.BleNotifyResponseBody;
 import cn.evergrand.it.bluetooth.connect.response.BleReadResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleReadRssiResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleUnnotifyResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleWriteResponse;
 import cn.evergrand.it.bluetooth.connect.response.BluetoothResponse;
 import cn.evergrand.it.bluetooth.connect.response.ConnectResponse;
+import cn.evergrand.it.bluetooth.encry.IBlueToothDecrypt;
 import cn.evergrand.it.bluetooth.model.BleGattProfile;
 import cn.evergrand.it.bluetooth.receiver.BluetoothReceiver;
 import cn.evergrand.it.bluetooth.receiver.listener.BleCharacterChangeListener;
@@ -45,6 +47,7 @@ import cn.evergrand.it.bluetooth.search.SearchRequest;
 import cn.evergrand.it.bluetooth.search.SearchResult;
 import cn.evergrand.it.bluetooth.search.response.SearchResponse;
 import cn.evergrand.it.bluetooth.utils.BluetoothLog;
+import cn.evergrand.it.bluetooth.utils.DataUtils;
 import cn.evergrand.it.bluetooth.utils.ListUtils;
 import cn.evergrand.it.bluetooth.utils.proxy.ProxyBulk;
 import cn.evergrand.it.bluetooth.utils.proxy.ProxyInterceptor;
@@ -68,7 +71,7 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
     private HandlerThread mWorkerThread;
     private Handler mWorkerHandler;
 
-    private HashMap<String, HashMap<String, List<BleNotifyResponse>>> mNotifyResponses;
+    private HashMap<String, HashMap<String, List<BleNotifyResponseBody>>> mNotifyResponses;
     private HashMap<String, List<BleConnectStatusListener>> mConnectStatusListeners;
     private List<BluetoothStateListener> mBluetoothStateListeners;
     private List<BluetoothBondListener> mBluetoothBondListeners;
@@ -82,7 +85,7 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
 
         mWorkerHandler = new Handler(mWorkerThread.getLooper(), this);
 
-        mNotifyResponses = new HashMap<String, HashMap<String, List<BleNotifyResponse>>>();
+        mNotifyResponses = new HashMap<String, HashMap<String, List<BleNotifyResponseBody>>>();
         mConnectStatusListeners = new HashMap<String, List<BleConnectStatusListener>>();
         mBluetoothStateListeners = new LinkedList<BluetoothStateListener>();
         mBluetoothBondListeners = new LinkedList<BluetoothBondListener>();
@@ -201,7 +204,8 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
     }
 
     @Override
-    public void read(String mac, UUID service, UUID character, final BleReadResponse response) {
+    public void read(String mac, UUID service, UUID character, final BleReadResponse response,
+                     final boolean needParseAndPacking, final IBlueToothDecrypt blueToothDecrypt) {
         Bundle args = new Bundle();
         args.putString(BlueToothConstants.EXTRA_MAC, mac);
         args.putSerializable(BlueToothConstants.EXTRA_SERVICE_UUID, service);
@@ -212,14 +216,16 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
                 checkRuntime(true);
                 if (response != null) {
                     byte[] bytes = data.getByteArray(BlueToothConstants.EXTRA_BYTE_VALUE);
-                    response.onRealResponse(code, bytes);
+                    bytes = DataUtils.parseData(needParseAndPacking, bytes, blueToothDecrypt);
+                    response.onResponse(code, bytes);
                 }
             }
         });
     }
 
     @Override
-    public void write(String mac, UUID service, UUID character, byte[] value, final BleWriteResponse response) {
+    public void write(String mac, UUID service, UUID character, byte[] value,
+                      final BleWriteResponse response, final boolean NeedParseAndPacking, final IBlueToothDecrypt blueToothDecrypt) {
         Bundle args = new Bundle();
         args.putString(BlueToothConstants.EXTRA_MAC, mac);
         args.putSerializable(BlueToothConstants.EXTRA_SERVICE_UUID, service);
@@ -231,7 +237,8 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
                 checkRuntime(true);
                 if (response != null) {
                     byte[] bytes = data.getByteArray(BlueToothConstants.EXTRA_WRITE_RES);
-                    response.onRealResponse(code, bytes);
+                    bytes = DataUtils.parseData(NeedParseAndPacking, bytes, blueToothDecrypt);
+                    response.onResponse(code, bytes);
                 }
             }
         });
@@ -293,27 +300,28 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
         });
     }
 
-    private void saveNotifyListener(String mac, UUID service, UUID character, BleNotifyResponse response) {
+    private void saveNotifyListener(String mac, UUID service, UUID character, BleNotifyResponse response,
+                                    boolean needParseAndPacking, IBlueToothDecrypt blueToothDecrypt) {
         checkRuntime(true);
-        HashMap<String, List<BleNotifyResponse>> listenerMap = mNotifyResponses.get(mac);
+        HashMap<String, List<BleNotifyResponseBody>> listenerMap = mNotifyResponses.get(mac);
         if (listenerMap == null) {
-            listenerMap = new HashMap<String, List<BleNotifyResponse>>();
+            listenerMap = new HashMap<String, List<BleNotifyResponseBody>>();
             mNotifyResponses.put(mac, listenerMap);
         }
 
         String key = generateCharacterKey(service, character);
-        List<BleNotifyResponse> responses = listenerMap.get(key);
+        List<BleNotifyResponseBody> responses = listenerMap.get(key);
         if (responses == null) {
-            responses = new ArrayList<BleNotifyResponse>();
+            responses = new ArrayList<BleNotifyResponseBody>();
             listenerMap.put(key, responses);
         }
-
-        responses.add(response);
+        BleNotifyResponseBody bleNotifyResponseBody = new BleNotifyResponseBody(needParseAndPacking, blueToothDecrypt, response);
+        responses.add(bleNotifyResponseBody);
     }
 
     private void removeNotifyListener(String mac, UUID service, UUID character) {
         checkRuntime(true);
-        HashMap<String, List<BleNotifyResponse>> listenerMap = mNotifyResponses.get(mac);
+        HashMap<String, List<BleNotifyResponseBody>> listenerMap = mNotifyResponses.get(mac);
         if (listenerMap != null) {
             String key = generateCharacterKey(service, character);
             listenerMap.remove(key);
@@ -330,7 +338,9 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
     }
 
     @Override
-    public void notify(final String mac, final UUID service, final UUID character, final BleNotifyResponse response) {
+    public void notify(final String mac, final UUID service, final UUID character,
+                       final BleNotifyResponse response,
+                       final boolean needParseAndPacking, final IBlueToothDecrypt blueToothDecrypt) {
         Bundle args = new Bundle();
         args.putString(BlueToothConstants.EXTRA_MAC, mac);
         args.putSerializable(BlueToothConstants.EXTRA_SERVICE_UUID, service);
@@ -341,7 +351,8 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
                 checkRuntime(true);
                 if (response != null) {
                     if (code == BlueToothConstants.REQUEST_SUCCESS) {
-                        saveNotifyListener(mac, service, character, response);
+                        saveNotifyListener(mac, service, character, response, needParseAndPacking,
+                                blueToothDecrypt);
                     }
                     response.onResponse(code);
                 }
@@ -370,7 +381,9 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
     }
 
     @Override
-    public void indicate(final String mac, final UUID service, final UUID character, final BleNotifyResponse response) {
+    public void indicate(final String mac, final UUID service, final UUID character,
+                         final BleNotifyResponse response,
+            final boolean needParseAndPacking, final IBlueToothDecrypt mIBlueToothDecrypt) {
         Bundle args = new Bundle();
         args.putString(BlueToothConstants.EXTRA_MAC, mac);
         args.putSerializable(BlueToothConstants.EXTRA_SERVICE_UUID, service);
@@ -381,7 +394,8 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
                 checkRuntime(true);
                 if (response != null) {
                     if (code == BlueToothConstants.REQUEST_SUCCESS) {
-                        saveNotifyListener(mac, service, character, response);
+                        saveNotifyListener(mac, service, character, response, needParseAndPacking,
+                                mIBlueToothDecrypt);
                     }
                     response.onResponse(code);
                 }
@@ -614,16 +628,20 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
 
     private void dispatchCharacterNotify(String mac, UUID service, UUID character, byte[] value) {
         checkRuntime(true);
-        HashMap<String, List<BleNotifyResponse>> notifyMap = mNotifyResponses.get(mac);
+        HashMap<String, List<BleNotifyResponseBody>> notifyMap = mNotifyResponses.get(mac);
         if (notifyMap != null) {
             String key = generateCharacterKey(service, character);
-            List<BleNotifyResponse> responses = notifyMap.get(key);
+            List<BleNotifyResponseBody> responses = notifyMap.get(key);
             if (responses != null) {
-                for (final BleNotifyResponse response : responses) {
-                    if (response == null) {
+                for (final BleNotifyResponseBody responseBody : responses) {
+                    if (responseBody == null) {
                         continue;
                     }
-                    response.onRealResponse(service, character, value);
+                    BleNotifyResponse response = responseBody.mNotifyResponse;
+                    value = DataUtils.parseData(responseBody.mNeedParseAndPacking, value, responseBody.mIBlueToothDecrypt);
+                    if (response != null) {
+                        response.onNotify(service, character, value);
+                    }
                 }
             }
         }

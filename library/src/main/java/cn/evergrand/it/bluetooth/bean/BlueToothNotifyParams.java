@@ -17,11 +17,14 @@ public class BlueToothNotifyParams {
     private UUID mServiceUUID;
     private UUID mCharacterUUID;
     private BleNotifyResponse mResponse;
+    private boolean mNeedParseAndPacking;
 
-    public BlueToothNotifyParams(@NonNull String mac, UUID serviceUUID, UUID characterUUID, BleNotifyResponse response){
+    public BlueToothNotifyParams(@NonNull String mac, UUID serviceUUID, UUID characterUUID,
+                                 boolean needParseAndPacking, BleNotifyResponse response){
         mMac = mac;
         mServiceUUID = serviceUUID;
         mCharacterUUID = characterUUID;
+        mNeedParseAndPacking = needParseAndPacking;
         mResponse = response;
     }
 
@@ -51,6 +54,10 @@ public class BlueToothNotifyParams {
 
     public UUID getCharacterUUID() {
         return mCharacterUUID;
+    }
+
+    public boolean isNeedParseAndPacking() {
+        return mNeedParseAndPacking;
     }
 
     public BleNotifyResponse getResponse() {

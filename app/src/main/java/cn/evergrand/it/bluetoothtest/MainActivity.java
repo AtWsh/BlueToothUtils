@@ -6,10 +6,18 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 
 import com.example.wenshenghui.bluetoothtest.R;
 
+import java.util.UUID;
+
+import cn.evergrand.it.bluetooth.BluetoothManager;
+import cn.evergrand.it.bluetooth.bean.BlueToothWriteParams;
+import cn.evergrand.it.bluetooth.connect.response.BleWriteResponse;
+import cn.evergrand.it.bluetooth.utils.UUIDUtils;
+import cn.evergrand.it.bluetooth.utils.type.DataType;
 import cn.evergrand.it.bluetoothtest.searchlist.BTDListActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -19,6 +27,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+
+        test();
+    }
+
+    private void test() {
+        byte[] data = new byte[1];
+        data[0] = 1;
+        UUID uuid = UUIDUtils.makeUUID(1);
+        UUID uuid1 = UUIDUtils.makeUUID(2);
+        BlueToothWriteParams params = new BlueToothWriteParams(data, "00:0D:6F:2C:9F:4F", uuid,
+                uuid1,false,
+                DataType.DOOR_HOME, new BleWriteResponse() {
+            @Override
+            public void onResponse(int code, byte[] data) {
+                Log.d("wsh", "code");
+            }
+        });
+        BluetoothManager.getInstance().write(params);
     }
 
     private void initView() {

@@ -13,6 +13,7 @@ import cn.evergrand.it.bluetooth.connect.response.BleReadRssiResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleUnnotifyResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleWriteResponse;
 import cn.evergrand.it.bluetooth.connect.response.ConnectResponse;
+import cn.evergrand.it.bluetooth.encry.IBlueToothDecrypt;
 import cn.evergrand.it.bluetooth.receiver.listener.BluetoothBondListener;
 import cn.evergrand.it.bluetooth.search.SearchRequest;
 import cn.evergrand.it.bluetooth.search.response.SearchResponse;
@@ -29,9 +30,11 @@ public interface IBluetoothClient {
 
     void unregisterConnectStatusListener(String mac, BleConnectStatusListener listener);
 
-    void read(String mac, UUID service, UUID character, BleReadResponse response);
+    void read(String mac, UUID service, UUID character, BleReadResponse response,
+              boolean needParseAndPacking, IBlueToothDecrypt blueToothDecrypt);
 
-    void write(String mac, UUID service, UUID character, byte[] value, BleWriteResponse response);
+    void write(String mac, UUID service, UUID character, byte[] value, BleWriteResponse response,
+               boolean NeedParseAndPacking, IBlueToothDecrypt blueToothDecrypt);
 
     void readDescriptor(String mac, UUID service, UUID character, UUID descriptor, BleReadResponse response);
 
@@ -39,11 +42,13 @@ public interface IBluetoothClient {
 
     void writeNoRsp(String mac, UUID service, UUID character, byte[] value, BleWriteResponse response);
 
-    void notify(String mac, UUID service, UUID character, BleNotifyResponse response);
+    void notify(String mac, UUID service, UUID character, BleNotifyResponse response,
+                boolean needParseAndPacking, IBlueToothDecrypt blueToothDecrypt);
 
     void unnotify(String mac, UUID service, UUID character, BleUnnotifyResponse response);
 
-    void indicate(String mac, UUID service, UUID character, BleNotifyResponse response);
+    void indicate(String mac, UUID service, UUID character, BleNotifyResponse response,
+                boolean needParseAndPacking, IBlueToothDecrypt blueToothDecrypt);
 
     void unindicate(String mac, UUID service, UUID character, BleUnnotifyResponse response);
 

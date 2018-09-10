@@ -15,6 +15,7 @@ import cn.evergrand.it.bluetooth.connect.response.BleReadRssiResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleUnnotifyResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleWriteResponse;
 import cn.evergrand.it.bluetooth.connect.response.ConnectResponse;
+import cn.evergrand.it.bluetooth.encry.IBlueToothDecrypt;
 import cn.evergrand.it.bluetooth.receiver.listener.BluetoothBondListener;
 import cn.evergrand.it.bluetooth.search.SearchRequest;
 import cn.evergrand.it.bluetooth.search.response.SearchResponse;
@@ -58,20 +59,22 @@ class BluetoothClient implements IBluetoothClient {
     }
 
     @Override
-    public void read(String mac, UUID service, UUID character, BleReadResponse response) {
+    public void read(String mac, UUID service, UUID character, BleReadResponse response,
+                     boolean needParseAndPacking, IBlueToothDecrypt blueToothDecrypt) {
         BluetoothLog.v(String.format("read character for %s: service = %s, character = %s", mac, service, character));
 
         response = ProxyUtils.getUIProxy(response);
-        mClient.read(mac, service, character, response);
+        mClient.read(mac, service, character, response, needParseAndPacking, blueToothDecrypt);
     }
 
     @Override
-    public void write(String mac, UUID service, UUID character, byte[] value, BleWriteResponse response) {
+    public void write(String mac, UUID service, UUID character, byte[] value, BleWriteResponse response,
+                      boolean NeedParseAndPacking, IBlueToothDecrypt blueToothDecrypt) {
         BluetoothLog.v(String.format("write character for %s: service = %s, character = %s, value = %s",
                 mac, service, character, ByteUtils.byteToString(value)));
 
         response = ProxyUtils.getUIProxy(response);
-        mClient.write(mac, service, character, value, response);
+        mClient.write(mac, service, character, value, response, NeedParseAndPacking, blueToothDecrypt);
     }
 
     @Override
@@ -97,11 +100,12 @@ class BluetoothClient implements IBluetoothClient {
     }
 
     @Override
-    public void notify(String mac, UUID service, UUID character, BleNotifyResponse response) {
+    public void notify(String mac, UUID service, UUID character, BleNotifyResponse response,
+                       boolean needParseAndPacking, IBlueToothDecrypt blueToothDecrypt) {
         BluetoothLog.v(String.format("notify %s: service = %s, character = %s", mac, service, character));
 
         response = ProxyUtils.getUIProxy(response);
-        mClient.notify(mac, service, character, response);
+        mClient.notify(mac, service, character, response, needParseAndPacking, blueToothDecrypt);
     }
 
     @Override
@@ -113,11 +117,12 @@ class BluetoothClient implements IBluetoothClient {
     }
 
     @Override
-    public void indicate(String mac, UUID service, UUID character, BleNotifyResponse response) {
+    public void indicate(String mac, UUID service, UUID character, BleNotifyResponse response,
+                         boolean needParseAndPacking, IBlueToothDecrypt blueToothDecrypt) {
         BluetoothLog.v(String.format("indicate %s: service = %s, character = %s", mac, service, character));
 
         response = ProxyUtils.getUIProxy(response);
-        mClient.indicate(mac, service, character, response);
+        mClient.indicate(mac, service, character, response, needParseAndPacking, blueToothDecrypt);
     }
 
     @Override

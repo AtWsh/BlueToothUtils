@@ -17,11 +17,15 @@ public class BlueToothReadParams {
     private UUID mServiceUUID;
     private UUID mCharacterUUID;
     private BleReadResponse mResponse;
+    private boolean mNeedParseAndPacking;
 
-    public BlueToothReadParams(@NonNull String mac, UUID serviceUUID, UUID characterUUID, BleReadResponse response){
+    public BlueToothReadParams(@NonNull String mac, UUID serviceUUID, UUID characterUUID,
+                               boolean needParseAndPacking,
+                               BleReadResponse response){
         mMac = mac;
         mServiceUUID = serviceUUID;
         mCharacterUUID = characterUUID;
+        mNeedParseAndPacking = needParseAndPacking;
         mResponse = response;
     }
 
@@ -51,6 +55,10 @@ public class BlueToothReadParams {
 
     public UUID getCharacterUUID() {
         return mCharacterUUID;
+    }
+
+    public boolean isNeedParseAndPacking() {
+        return mNeedParseAndPacking;
     }
 
     public BleReadResponse getResponse() {
