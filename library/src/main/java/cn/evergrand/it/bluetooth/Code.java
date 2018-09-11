@@ -14,6 +14,7 @@ public class Code {
     public static final int REQUEST_DENIED = -9;
     public static final int REQUEST_EXCEPTION = -10;
     public static final int REQUEST_UNKNOWN = -11;
+    public static final int MAC_IS_NULL = -12;
 
     public static String toString(int code) {
         switch (code) {

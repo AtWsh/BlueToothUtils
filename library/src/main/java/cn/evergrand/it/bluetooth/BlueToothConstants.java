@@ -40,6 +40,7 @@ public class BlueToothConstants {
     public static final int REQUEST_OVERFLOW = Code.REQUEST_OVERFLOW;
     public static final int REQUEST_DENIED = Code.REQUEST_DENIED;
     public static final int REQUEST_EXCEPTION = Code.REQUEST_EXCEPTION;
+    public static final int MAC_IS_NULL = Code.MAC_IS_NULL;
 
     /**
      * Scan Response code

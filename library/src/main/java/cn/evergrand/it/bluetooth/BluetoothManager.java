@@ -180,17 +180,22 @@ public class BluetoothManager {
     /**
      * 连接经典蓝牙，默认连接配置
      *
-     * @param device
+     * @param mac
      * @param connectResponse
      */
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
-    private void connectClassic(final BluetoothDevice device, ConnectResponse connectResponse) {
-        if (device == null) {
+    private void connectClassic(String mac, ConnectResponse connectResponse) {
+        if (connectResponse == null) {
+            return;
+        }
+
+        if (TextUtils.isEmpty(mac)) {
+            connectResponse.onResponse(BlueToothConstants.MAC_IS_NULL, null);
             return;
         }
 
         mConnectResponse = connectResponse;
-        mClient.connectClassic(device.getAddress(), connectResponse);
+        mClient.connectClassic(mac, connectResponse);
     }
 
     /**
@@ -208,15 +213,19 @@ public class BluetoothManager {
             return;
         }
         if (result.isBleDevice) {
-            connectBle(result.device, connectResponse);
+            connectBle(result.device.getAddress(), connectResponse);
         }else {
-            connectClassic(result.device, connectResponse);
+            connectClassic(result.device.getAddress(), connectResponse);
         }
 
     }
 
-    private void connectBle(BluetoothDevice device, ConnectResponse connectResponse) {
-        if (device == null) {
+    private void connectBle(String mac, ConnectResponse connectResponse) {
+        if (connectResponse == null) {
+            return;
+        }
+        if (TextUtils.isEmpty(mac)) {
+            connectResponse.onResponse(BlueToothConstants.MAC_IS_NULL, null);
             return;
         }
         //startTimer(20,BLE_CONNECT_FAIL);
@@ -228,8 +237,18 @@ public class BluetoothManager {
                 .setServiceDiscoverTimeout(BlueToothConstants.BLE_SERVICE_DISTIMEOUT)  // 发现服务超时10s
                 .build();
         //mClient.registerConnectStatusListener(mac, mBleConnectStatusListener);
-        mClient.connect(device.getAddress(), options, connectResponse);
+        mClient.connect(mac, options, connectResponse);
         //mClient.notify(mac, UUID.fromString(BT_UUID), UUID.fromString(BT_READ_UUID), mNotifyRsp);
+    }
+
+    /**
+     * 连接蓝牙，自定义连接配置
+     *
+     * @param mac
+     * @param options
+     */
+    public void connect(String mac, ConnectResponse connectResponse, ConnectOptions options) {
+        connectBle(mac, connectResponse, options);
     }
 
     /**
@@ -244,26 +263,31 @@ public class BluetoothManager {
             return;
         }
         if (result.isBleDevice) {
-            connectBle(result.device, connectResponse, options);
+            connectBle(result.device.getAddress(), connectResponse, options);
         }else {
-            connectClassic(result.device, connectResponse);
+            connectClassic(result.device.getAddress(), connectResponse);
         }
 
     }
 
     /**
      *
-     * @param device
+     * @param mac
      * @param connectResponse
      * @param options
      */
-    private void connectBle(BluetoothDevice device, ConnectResponse connectResponse, ConnectOptions options) {
-        if (device == null || TextUtils.isEmpty(device.getAddress())) {
+    private void connectBle(String mac, ConnectResponse connectResponse, ConnectOptions options) {
+
+        if (connectResponse == null) {
+            return;
+        }
+        if (TextUtils.isEmpty(mac)) {
+            connectResponse.onResponse(BlueToothConstants.MAC_IS_NULL, null);
             return;
         }
         mConnectResponse = connectResponse;
         //mClient.registerConnectStatusListener(mac, mBleConnectStatusListener);
-        mClient.connect(device.getAddress(), options, connectResponse);
+        mClient.connect(mac, options, connectResponse);
         //mClient.notify(mac, UUID.fromString(BT_UUID), UUID.fromString(BT_READ_UUID), mNotifyRsp);
     }
 
