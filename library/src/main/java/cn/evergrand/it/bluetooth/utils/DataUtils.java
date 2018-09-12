@@ -121,7 +121,7 @@ public class DataUtils {
      * @return 解析原始数据从第六位开始截断
      */
     private static byte[] getParseData(byte[] data) {
-        if (data == null || data.length < 12) {
+        if (data == null || data.length < 11) {
             return null;
         }
         byte[] newData = ByteUtils.subBytes(data, 6, data.length - 10);
@@ -174,8 +174,8 @@ public class DataUtils {
         newData[3] = 0;
         newData[4] = 0;
         newData[5] = 0;
-        for (int i = 6; i < newData.length; i++) {
-            newData[i] =  oldData[i - 1];
+        for (int i = 6; i < newData.length - 4; i++) {
+            newData[i] =  oldData[i - 6];
         }
         newData[newLength - 4] = 0;
         newData[newLength - 3] = 0;
