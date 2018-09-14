@@ -3,17 +3,26 @@ package cn.evergrand.it.bluetoothtest.searchlist;
 
 import android.bluetooth.BluetoothDevice;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.wenshenghui.bluetoothtest.R;
 
+import java.util.List;
+import java.util.UUID;
+
 import cn.evergrand.it.bluetooth.BlueToothConstants;
 import cn.evergrand.it.bluetooth.BluetoothManager;
+import cn.evergrand.it.bluetooth.bean.BlueToothNotifyParams;
 import cn.evergrand.it.bluetooth.connect.options.ConnectOptions;
+import cn.evergrand.it.bluetooth.connect.response.BleNotifyResponse;
 import cn.evergrand.it.bluetooth.connect.response.ConnectResponse;
+import cn.evergrand.it.bluetooth.encry.IBlueToothDecrypt;
+import cn.evergrand.it.bluetooth.model.BleGattCharacter;
 import cn.evergrand.it.bluetooth.model.BleGattProfile;
+import cn.evergrand.it.bluetooth.model.BleGattService;
 import cn.evergrand.it.bluetooth.search.SearchResult;
 import cn.evergrand.it.bluetooth.utils.BluetoothLog;
 
@@ -83,7 +92,7 @@ public class BTDListViewHolder extends RecyclerView.ViewHolder {
                 .setServiceDiscoverTimeout(10000)
                 .build();
 
-        BluetoothManager.getInstance().connect(result, new ConnectResponse() {
+        BluetoothManager.getInstance().connect(result.device.getAddress(), new ConnectResponse() {
             @Override
             public void onGetPin(int pin) {
 
@@ -101,6 +110,37 @@ public class BTDListViewHolder extends RecyclerView.ViewHolder {
                     //Intent in = new Intent(mRootView.getContext(), DataOprationActivity.class);
                     //in.putExtra("SearchResult", result);
                     //mRootView.getContext().startActivity(in);
+                    if (profile == null) {
+                        Log.d("wsh", "onResponse:  profile = profile");
+                        return;
+                    }
+                    List<BleGattService> services = profile.getServices();
+
+                    UUID serviceUUID = null;
+                    UUID characterUUID = null;
+                    for (BleGattService service : services) {
+                        serviceUUID = service.getUUID();
+                        List<BleGattCharacter> characters = service.getCharacters();
+                        for (BleGattCharacter character : characters) {
+                            characterUUID = character.getUuid();
+                            break;
+                        }
+                        if (characterUUID != null) {
+                            break;
+                        }
+                    }
+                    Log.d("wsh", "serviceUUID = " + serviceUUID.toString() + "   characterUUID = " + characterUUID.toString());
+                    notifyBle(device.getAddress(), serviceUUID, characterUUID, new BleNotifyResponse() {
+                        @Override
+                        public void onNotify(UUID service, UUID character, byte[] value) {
+                            Log.d("wsh", "onNotify");
+                        }
+
+                        @Override
+                        public void onResponse(int code) {
+                            Log.d("wsh", "onNotify  onResponse code =" + code);
+                        }
+                    });
                 }
             }
         }, options);
@@ -147,6 +187,23 @@ public class BTDListViewHolder extends RecyclerView.ViewHolder {
                 }
             }
         }, options);*/
+    }
+
+    public void notifyBle(String mac, UUID serviceUUID, UUID characterUUID, BleNotifyResponse response) {
+
+        BlueToothNotifyParams blueToothNotifyParams = new BlueToothNotifyParams(mac, serviceUUID,
+                characterUUID, true,response);
+        BluetoothManager.getInstance().notify(blueToothNotifyParams);
+
+        BluetoothManager.getInstance().notify(blueToothNotifyParams, new IBlueToothDecrypt() {
+            @Override
+            public byte[] decrypt(byte[] data) {
+
+                //TODO 解密算法获取解密后的data
+                return data;
+            }
+        });
+
     }
 
     public void setInConnectionListener(BTDListActivity.InConnectionListener inConnectionListener) {

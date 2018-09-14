@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -606,11 +607,21 @@ public class BleConnectWorker implements Handler.Callback, IBleConnectWorker, IB
             return false;
         }
 
-        BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BlueToothConstants.CLIENT_CHARACTERISTIC_CONFIG);
+       /* for (BluetoothGattDescriptor descriptor:characteristic.getDescriptors()){
+            BluetoothLog.d("BluetoothGattDescriptor: "+descriptor.getUuid().toString());
+        }*/
+
+        BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BlueToothConstants.CLIENT_CHARACTERISTIC_CONFIG1);
 
         if (descriptor == null) {
-            BluetoothLog.e(String.format("getDescriptor for notify null!"));
-            return false;
+            BluetoothLog.e(String.format("getDescriptor1 for notify null!"));
+
+            descriptor = characteristic.getDescriptor(BlueToothConstants.CLIENT_CHARACTERISTIC_CONFIG2);
+
+            if (descriptor == null) {
+                BluetoothLog.e(String.format("getDescriptor2 for notify null!"));
+                return false;
+            }
         }
 
         byte[] value = (enable ? BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE : BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
@@ -657,11 +668,16 @@ public class BleConnectWorker implements Handler.Callback, IBleConnectWorker, IB
             return false;
         }
 
-        BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BlueToothConstants.CLIENT_CHARACTERISTIC_CONFIG);
+        BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BlueToothConstants.CLIENT_CHARACTERISTIC_CONFIG1);
 
         if (descriptor == null) {
-            BluetoothLog.e(String.format("getDescriptor for indicate null!"));
-            return false;
+            BluetoothLog.e(String.format("getDescriptor1 for indicate null!"));
+            descriptor = characteristic.getDescriptor(BlueToothConstants.CLIENT_CHARACTERISTIC_CONFIG2);
+
+            if (descriptor == null) {
+                BluetoothLog.e(String.format("getDescriptor2 for indicate null!"));
+                return false;
+            }
         }
 
         byte[] value = (enable ? BluetoothGattDescriptor.ENABLE_INDICATION_VALUE : BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);

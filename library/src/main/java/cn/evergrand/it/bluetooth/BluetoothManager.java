@@ -79,6 +79,10 @@ public class BluetoothManager {
         return sInstance;
     }
 
+    public void openLog(boolean open) {
+        BlueToothConfig.sOpenLog = open;
+    }
+
     /**
      * 开启蓝牙
      * @return true to indicate adapter startup has begun, or false on

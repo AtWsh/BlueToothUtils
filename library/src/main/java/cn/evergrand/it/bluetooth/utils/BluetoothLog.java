@@ -1,9 +1,13 @@
 package cn.evergrand.it.bluetooth.utils;
 
 
+import android.util.Log;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+
+import cn.evergrand.it.bluetooth.BlueToothConfig;
 
 public class BluetoothLog {
 
@@ -11,45 +15,45 @@ public class BluetoothLog {
 
 
     public static void i(String msg) {
-        /*if (BuildConfig.DEBUG) {
+        if (BlueToothConfig.sOpenLog) {
             Log.i(LOG_TAG, msg);
-        }*/
+        }
     }
 
     public static void e(String msg) {
-        /*if (BuildConfig.DEBUG) {
+        if (BlueToothConfig.sOpenLog) {
             Log.e(LOG_TAG, msg);
-        }*/
+        }
     }
 
     public static void v(String msg) {
-        /*if (BuildConfig.DEBUG) {
+        if (BlueToothConfig.sOpenLog) {
             Log.v(LOG_TAG, msg);
-        }*/
+        }
     }
 
     public static void d(String msg) {
-        /*if (BuildConfig.DEBUG) {
+        if (BlueToothConfig.sOpenLog) {
             Log.d(LOG_TAG, msg);
-        }*/
+        }
     }
 
     public static void w(String msg) {
-        /*if (BuildConfig.DEBUG) {
+        if (BlueToothConfig.sOpenLog) {
             Log.w(LOG_TAG, msg);
-        }*/
+        }
     }
 
     public static void e(Throwable e) {
-        /*if (BuildConfig.DEBUG) {
+        if (BlueToothConfig.sOpenLog) {
             e(getThrowableString(e));
-        }*/
+        }
     }
 
     public static void w(Throwable e) {
-        /*if (BuildConfig.DEBUG) {
+        if (BlueToothConfig.sOpenLog) {
             w(getThrowableString(e));
-        }*/
+        }
     }
 
     private static String getThrowableString(Throwable e) {

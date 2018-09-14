@@ -59,7 +59,8 @@ public class BlueToothConstants {
     public static final int SEARCH_TYPE_CLASSIC = 1;
     public static final int SEARCH_TYPE_BLE = 2;
 
-    public static final UUID CLIENT_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+    public static final UUID CLIENT_CHARACTERISTIC_CONFIG1 = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+    public static final UUID CLIENT_CHARACTERISTIC_CONFIG2 = UUID.fromString("00002900-0000-1000-8000-00805f9b34fb");
 
     public static final int CODE_CONNECT_BLE = 1;
     public static final int CODE_DISCONNECT = 2;
