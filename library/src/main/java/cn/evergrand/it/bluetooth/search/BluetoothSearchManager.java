@@ -14,24 +14,24 @@ public class BluetoothSearchManager {
         BluetoothSearchHelper.getInstance().startSearch(requestWrapper, new BluetoothSearchResponse() {
             @Override
             public void onSearchStarted() {
-                response.onResponse(BlueToothConstants.SEARCH_START, null);
+                response.onResponse(BlueToothConstants.SEARCH_START, null, 0);
             }
 
             @Override
             public void onDeviceFounded(SearchResult device) {
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(BlueToothConstants.EXTRA_SEARCH_RESULT, device);
-                response.onResponse(BlueToothConstants.DEVICE_FOUND, bundle);
+                response.onResponse(BlueToothConstants.DEVICE_FOUND, bundle, 0);
             }
 
             @Override
             public void onSearchStopped() {
-                response.onResponse(BlueToothConstants.SEARCH_STOP, null);
+                response.onResponse(BlueToothConstants.SEARCH_STOP, null, 0);
             }
 
             @Override
             public void onSearchCanceled() {
-                response.onResponse(BlueToothConstants.SEARCH_CANCEL, null);
+                response.onResponse(BlueToothConstants.SEARCH_CANCEL, null, 0);
             }
         });
     }

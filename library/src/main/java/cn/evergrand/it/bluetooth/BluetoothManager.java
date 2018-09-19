@@ -21,6 +21,7 @@ import cn.evergrand.it.bluetooth.bean.BlueToothUnnotifyParams;
 import cn.evergrand.it.bluetooth.bean.BlueToothWriteParams;
 import cn.evergrand.it.bluetooth.connect.listener.BluetoothStateListener;
 import cn.evergrand.it.bluetooth.connect.options.ConnectOptions;
+import cn.evergrand.it.bluetooth.connect.response.BleMtuResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleNotifyResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleReadResponse;
 import cn.evergrand.it.bluetooth.connect.response.BleUnnotifyResponse;
@@ -52,6 +53,8 @@ public class BluetoothManager {
     private ConnectResponse mConnectResponse;
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private boolean mNeedInterceptPinDialog = false; //是否拦截Pin码提示弹窗
+    private int mtu = 20;
+    private static int MAX_MTU = 512;
 
 
     private BluetoothManager() {}
@@ -194,7 +197,7 @@ public class BluetoothManager {
         }
 
         if (TextUtils.isEmpty(mac)) {
-            connectResponse.onResponse(BlueToothConstants.MAC_IS_NULL, null);
+            connectResponse.onResponse(BlueToothConstants.MAC_IS_NULL, null, 0);
             return;
         }
 
@@ -213,7 +216,7 @@ public class BluetoothManager {
         }
 
         if(!mClient.isBluetoothOpened()) { //没打开蓝牙
-            connectResponse.onResponse(BlueToothConstants.BLUETOOTH_DISABLED, null);
+            connectResponse.onResponse(BlueToothConstants.BLUETOOTH_DISABLED, null, 0);
             return;
         }
         if (result.isBleDevice) {
@@ -229,7 +232,7 @@ public class BluetoothManager {
             return;
         }
         if (TextUtils.isEmpty(mac)) {
-            connectResponse.onResponse(BlueToothConstants.MAC_IS_NULL, null);
+            connectResponse.onResponse(BlueToothConstants.MAC_IS_NULL, null, 0);
             return;
         }
         //startTimer(20,BLE_CONNECT_FAIL);
@@ -286,14 +289,24 @@ public class BluetoothManager {
             return;
         }
         if (TextUtils.isEmpty(mac)) {
-            connectResponse.onResponse(BlueToothConstants.MAC_IS_NULL, null);
+            connectResponse.onResponse(BlueToothConstants.MAC_IS_NULL, null, 0);
             return;
         }
         mConnectResponse = connectResponse;
         //mClient.registerConnectStatusListener(mac, mBleConnectStatusListener);
         mClient.connect(mac, options, connectResponse);
-        //mClient.notify(mac, UUID.fromString(BT_UUID), UUID.fromString(BT_READ_UUID), mNotifyRsp);
+        mClient.requestMtu(mac, MAX_MTU, mBleMtuResponse);
     }
+
+    private BleMtuResponse mBleMtuResponse = new BleMtuResponse() {
+        @Override
+        public void onResponse(int code, Integer data, int requestId) {
+            if (code == BlueToothConstants.REQUEST_SUCCESS) {
+                Log.d("wsh_log", "Mtu请求成功  mtu = " + MAX_MTU);
+                mtu = MAX_MTU - 3; //3个字节留给系统打包  MTU范围23 - 512。 此处限定20-509.
+            }
+        }
+    };
 
     /**
      * 连接状态监听，断开重连，如果需要，可以开放
@@ -436,19 +449,20 @@ public class BluetoothManager {
         int type = writeParams.getDataType();
         boolean needParseAndPacking = writeParams.isNeedParseAndPacking();
         BleWriteResponse response = writeParams.getResponse();
+        int requestId = writeParams.getRequestId();
 
-        byte[] realValue = DataUtils.packingData(value, needParseAndPacking, type , encryAndDecry);
+        byte[] realValue = DataUtils.packingData(value, needParseAndPacking, type , requestId, encryAndDecry);
         int length = realValue.length;
-        int count = length / 21;
-        int sendCount = length % 21 == 0 ? count : (count + 1);
+        int count = length / mtu;
+        int sendCount = length % mtu == 0 ? count : (count + 1);
         for (int i = 0; i < sendCount; i++) {
             byte[] data;
             if (i == 0) {
-                data = ByteUtils.subBytes(realValue, i * 20, length > 21 ? 20 : length);
+                data = ByteUtils.subBytes(realValue, i * mtu, length > mtu ? mtu : length);
             } else {
                 //每次只能写21 byte ，总长度分批发送
-                data = ByteUtils.subBytes(realValue, i * 20,
-                        (length - (i + 1) * 20) > 0 ? 20 : 20 - ((i + 1) * 20 - length));
+                data = ByteUtils.subBytes(realValue, i * mtu,
+                        (length - (i + 1) * mtu) > 0 ? mtu : mtu - ((i + 1) * mtu - length) + 1);
             }
             mClient.write(mac, serviceUUID, characterUUID,
                     data, response, needParseAndPacking, encryAndDecry);

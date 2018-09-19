@@ -79,7 +79,7 @@ public abstract class BleRequest implements IBleConnectWorker, IBleRequest, Hand
             public void run() {
                 try {
                     if (mResponse != null) {
-                        mResponse.onResponse(code, mExtra);
+                        mResponse.onResponse(code, mExtra, 0);
                     }
                 } catch (Throwable e) {
                     e.printStackTrace();

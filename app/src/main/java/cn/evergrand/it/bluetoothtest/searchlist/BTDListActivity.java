@@ -277,7 +277,7 @@ public class BTDListActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(int code, BleGattProfile data) {
+            public void onResponse(int code, BleGattProfile data, int requestId) {
                 /*// 注意这是操作样例，实际操作根据需求来写
                 if (code == BlueToothConstants.REQUEST_SUCCESS){ //表示连接成功
                     //TODO  如果是经典蓝牙，此处data为null
@@ -311,7 +311,7 @@ public class BTDListActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onResponse(int code, BleGattProfile data) {
+        public void onResponse(int code, BleGattProfile data, int requestId) {
                 /*// 注意这是操作样例，实际操作根据需求来写
                 if (code == BlueToothConstants.REQUEST_SUCCESS){ //表示连接成功
                     //TODO
@@ -353,7 +353,7 @@ public class BTDListActivity extends AppCompatActivity {
 
     private BleNotifyResponse mBleNotifyResponse = new BleNotifyResponse() {
         @Override
-        public void onNotify(UUID service, UUID character, byte[] value) {
+        public void onNotify(UUID service, UUID character, byte[] value, int requestId) {
 
         }
 
@@ -401,7 +401,7 @@ public class BTDListActivity extends AppCompatActivity {
 
     private BleReadResponse mReadRsp = new BleReadResponse() {
         @Override
-        public void onResponse(int code, byte[] data) {
+        public void onResponse(int code, byte[] data, int requestId) {
             if (code == BlueToothConstants.REQUEST_SUCCESS) {
                 //读取成功
             } else {
@@ -413,7 +413,7 @@ public class BTDListActivity extends AppCompatActivity {
     public void write(String mac, UUID serviceUUID, UUID characterUUID, byte[] value, BleWriteResponse mWriteRsp) {
 
         BlueToothWriteParams blueToothWriteParams = new BlueToothWriteParams(value, mac, serviceUUID,
-                characterUUID, true, DataType.DOOR_HOME, mWriteRsp);
+                characterUUID, true, DataType.DOOR_HOME, 1, mWriteRsp);
         BluetoothManager.getInstance().write(blueToothWriteParams);
 
 
@@ -435,7 +435,7 @@ public class BTDListActivity extends AppCompatActivity {
 
     private final BleWriteResponse mWriteRsp = new BleWriteResponse() {
         @Override
-        public void onResponse(int code, byte[] value) {
+        public void onResponse(int code, byte[] value, int requestId) {
             if (code == BlueToothConstants.REQUEST_SUCCESS) { //写入成功
                 //value为设备返回数据
                 //这里注意，如果是分包写入的，实际可能会调用多次，

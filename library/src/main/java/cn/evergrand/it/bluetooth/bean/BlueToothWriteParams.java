@@ -23,14 +23,19 @@ public class BlueToothWriteParams {
     private BleWriteResponse mResponse;
     private boolean mNeedParseAndPacking = true;
     private int mDataType;
+    private int mRequestId = 0;
 
-    public BlueToothWriteParams(byte[] value, @NonNull String mac, UUID serviceUUID, UUID characterUUID, boolean needParseAndPacking, @DataType.BtDeviceDataType int type, BleWriteResponse response){
+    public BlueToothWriteParams(byte[] value, @NonNull String mac, UUID serviceUUID,
+                                UUID characterUUID, boolean needParseAndPacking,
+                                @DataType.BtDeviceDataType int type, int requestId,
+                                BleWriteResponse response){
         mValue = value;
         mMac = mac;
         mServiceUUID = serviceUUID;
         mCharacterUUID = characterUUID;
         mNeedParseAndPacking = needParseAndPacking;
         mDataType = type;
+        mRequestId = requestId;
         mResponse = response;
     }
 
@@ -75,5 +80,9 @@ public class BlueToothWriteParams {
     }
     public int getDataType() {
         return mDataType;
+    }
+
+    public int getRequestId() {
+        return mRequestId;
     }
 }

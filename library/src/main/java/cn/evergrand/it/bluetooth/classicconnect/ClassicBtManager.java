@@ -29,7 +29,7 @@ public class ClassicBtManager implements BaseConfigCallback {
             return;
         }
         CbtClientService.getInstance().isConnection = true;
-        mResponse.onResponse(BlueToothConstants.REQUEST_SUCCESS, null);
+        mResponse.onResponse(BlueToothConstants.REQUEST_SUCCESS, null, 0);
         onDestroy();
     }
 
@@ -68,7 +68,7 @@ public class ClassicBtManager implements BaseConfigCallback {
             //配对蓝牙
             BluetoothDevice remoteDevice = mBluetoothAdapter.getRemoteDevice(mac);
             if (remoteDevice == null) {
-                mResponse.onResponse(BlueToothConstants.REQUEST_FAILED, null);
+                mResponse.onResponse(BlueToothConstants.REQUEST_FAILED, null, 0);
                 return;
             }
             CbtClientService.getInstance().init(mBluetoothAdapter, remoteDevice, response);

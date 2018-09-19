@@ -49,6 +49,7 @@ import cn.evergrand.it.bluetooth.search.response.SearchResponse;
 import cn.evergrand.it.bluetooth.utils.BluetoothLog;
 import cn.evergrand.it.bluetooth.utils.DataUtils;
 import cn.evergrand.it.bluetooth.utils.ListUtils;
+import cn.evergrand.it.bluetooth.utils.ParseData;
 import cn.evergrand.it.bluetooth.utils.proxy.ProxyBulk;
 import cn.evergrand.it.bluetooth.utils.proxy.ProxyInterceptor;
 import cn.evergrand.it.bluetooth.utils.proxy.ProxyUtils;
@@ -161,7 +162,7 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
                 if (response != null) {
                     data.setClassLoader(getClass().getClassLoader());
                     BleGattProfile profile = data.getParcelable(BlueToothConstants.EXTRA_GATT_PROFILE);
-                    response.onResponse(code, profile);
+                    response.onResponse(code, profile, 0);
                 }
             }
         });
@@ -216,8 +217,10 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
                 checkRuntime(true);
                 if (response != null) {
                     byte[] bytes = data.getByteArray(BlueToothConstants.EXTRA_BYTE_VALUE);
-                    bytes = DataUtils.parseData(needParseAndPacking, bytes, blueToothDecrypt);
-                    response.onResponse(code, bytes);
+                    ParseData parseData = DataUtils.parseData(needParseAndPacking, bytes, blueToothDecrypt);
+                    bytes = parseData.mData;
+                    int requestId = parseData.mRequestId;
+                    response.onResponse(code, bytes, requestId);
                 }
             }
         });
@@ -237,8 +240,10 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
                 checkRuntime(true);
                 if (response != null) {
                     byte[] bytes = data.getByteArray(BlueToothConstants.EXTRA_WRITE_RES);
-                    bytes = DataUtils.parseData(NeedParseAndPacking, bytes, blueToothDecrypt);
-                    response.onResponse(code, bytes);
+                    ParseData parseData = DataUtils.parseData(NeedParseAndPacking, bytes, blueToothDecrypt);
+                    bytes = parseData.mData;
+                    int requestId = parseData.mRequestId;
+                    response.onResponse(code, bytes, requestId);
                 }
             }
         });
@@ -256,7 +261,7 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
             protected void onAsyncResponse(int code, Bundle data) {
                 checkRuntime(true);
                 if (response != null) {
-                    response.onResponse(code, data.getByteArray(BlueToothConstants.EXTRA_BYTE_VALUE));
+                    response.onResponse(code, data.getByteArray(BlueToothConstants.EXTRA_BYTE_VALUE), 0);
                 }
             }
         });
@@ -275,7 +280,7 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
             protected void onAsyncResponse(int code, Bundle data) {
                 checkRuntime(true);
                 if (response != null) {
-                    response.onResponse(code, null);
+                    response.onResponse(code, null, 0);
                 }
             }
         });
@@ -294,7 +299,7 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
                 checkRuntime(true);
                 if (response != null) {
                     byte[] bytes = data.getByteArray(BlueToothConstants.EXTRA_WRITE_RES);
-                    response.onResponse(code, bytes);
+                    response.onResponse(code, bytes, 0);
                 }
             }
         });
@@ -417,7 +422,7 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
             protected void onAsyncResponse(int code, Bundle data) {
                 checkRuntime(true);
                 if (response != null) {
-                    response.onResponse(code, data.getInt(BlueToothConstants.EXTRA_RSSI, 0));
+                    response.onResponse(code, data.getInt(BlueToothConstants.EXTRA_RSSI, 0), 0);
                 }
             }
         });
@@ -433,7 +438,7 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
             protected void onAsyncResponse(int code, Bundle data) {
                 checkRuntime(true);
                 if (response != null) {
-                    response.onResponse(code, data.getInt(BlueToothConstants.EXTRA_MTU, BlueToothConstants.GATT_DEF_BLE_MTU_SIZE));
+                    response.onResponse(code, data.getInt(BlueToothConstants.EXTRA_MTU, BlueToothConstants.GATT_DEF_BLE_MTU_SIZE), 0);
                 }
             }
         });
@@ -638,9 +643,11 @@ public class BluetoothClientImpl implements IBluetoothClient, ProxyInterceptor, 
                         continue;
                     }
                     BleNotifyResponse response = responseBody.mNotifyResponse;
-                    value = DataUtils.parseData(responseBody.mNeedParseAndPacking, value, responseBody.mIBlueToothDecrypt);
+                    ParseData parseData = DataUtils.parseData(responseBody.mNeedParseAndPacking, value, responseBody.mIBlueToothDecrypt);
+                    value = parseData.mData;
+                    int requestId = parseData.mRequestId;
                     if (response != null) {
-                        response.onNotify(service, character, value);
+                        response.onNotify(service, character, value, requestId);
                     }
                 }
             }

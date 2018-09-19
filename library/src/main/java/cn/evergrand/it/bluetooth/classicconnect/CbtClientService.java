@@ -43,7 +43,7 @@ public class CbtClientService {
         mResponse = callBack;
         if (mBluetoothDevice != null) {
             if (mBluetoothAdapter.getAddress().equals(device.getAddress())) {
-                mResponse.onResponse(BlueToothConstants.REQUEST_SUCCESS, null);
+                mResponse.onResponse(BlueToothConstants.REQUEST_SUCCESS, null, 0);
                 return;
             } else {
                 cancel();
@@ -57,7 +57,7 @@ public class CbtClientService {
             //尝试建立安全的连接
             tmp = mBluetoothDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
         } catch (IOException e) {
-            mResponse.onResponse(BlueToothConstants.REQUEST_FAILED, null);
+            mResponse.onResponse(BlueToothConstants.REQUEST_FAILED, null, 0);
         }
         mBluetoothSocket = tmp;
         connect();
@@ -87,7 +87,7 @@ public class CbtClientService {
         protected void onPostExecute(Boolean isFaild) {
            //
             if (isFaild) {
-                mResponse.onResponse(BlueToothConstants.REQUEST_FAILED, null);
+                mResponse.onResponse(BlueToothConstants.REQUEST_FAILED, null, 0);
             }
         }
 

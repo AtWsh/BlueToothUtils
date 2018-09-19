@@ -22,22 +22,25 @@ public class DataUtils {
      * @param value
      * @return
      */
-    public static byte[] parseData(boolean needParseAndPacking, byte[] value, IBlueToothDecrypt decrypt) {
+    public static ParseData parseData(boolean needParseAndPacking, byte[] value, IBlueToothDecrypt decrypt) {
         if (value == null) {
-            return value;
+            return new ParseData();
         }
         if (!needParseAndPacking) { //不做处理
+            ParseData parseData = new ParseData();
             if (decrypt != null) {
-                return decrypt.decrypt(value);
+                parseData.mData = decrypt.decrypt(value);
+                return parseData;
             }
-            return value;
+            parseData.mData = value;
+            return parseData;
         }else if (decrypt == null) { //只做解析处理
             return DataUtils.realParseData(value);
         }else if (decrypt != null) {//先解析，后解密
             return DataUtils.parseAndDecry(value, decrypt);
         }
 
-        return value;
+        return new ParseData();
     }
 
     /**
@@ -47,7 +50,10 @@ public class DataUtils {
      * @param value
      * @return
      */
-    public static byte[] packingData(byte[] value, boolean needParseAndPacking, @DataType.BtDeviceDataType int type, IBlueToothEncryAndDecry encryAndDecry) {
+    public static byte[] packingData(byte[] value, boolean needParseAndPacking,
+                                     @DataType.BtDeviceDataType int type,
+                                     int requestId,
+                                     IBlueToothEncryAndDecry encryAndDecry) {
         if (value == null) {
             return value;
         }
@@ -58,9 +64,9 @@ public class DataUtils {
             return value;
 
         }else if (encryAndDecry == null) { //封装处理
-            return DataUtils.realPackingData(value,type);
+            return DataUtils.realPackingData(value, type, requestId);
         } else if (encryAndDecry != null) {//先加密再封装
-            return DataUtils.realPackingData(encryAndDecry.encrypt(value),type);
+            return DataUtils.realPackingData(encryAndDecry.encrypt(value), type, requestId);
         }
 
         return value;
@@ -71,11 +77,11 @@ public class DataUtils {
      * @param data 已加密的数据
      * @return
      */
-    private static byte[] realPackingData(byte[] data, @DataType.BtDeviceDataType int type) {
+    private static byte[] realPackingData(byte[] data, @DataType.BtDeviceDataType int type, int requestId) {
         if (data == null) {
             return null;
         }
-        byte[] newData = addHeadPart(data, type);
+        byte[] newData = addHeadPart(data, type, requestId);
         if (newData == null || newData.length == 0) {
             return null;
         }
@@ -87,13 +93,15 @@ public class DataUtils {
      * 解析然后解密
      * @return
      */
-    private static byte[] parseAndDecry(byte[] data, IBlueToothDecrypt decrypt) {
+    private static ParseData parseAndDecry(byte[] data, IBlueToothDecrypt decrypt) {
         if (data == null || decrypt == null) {
-            return null;
+            return new ParseData();
         }
 
-        byte[] parseData = realParseData(data);
-        return decrypt.decrypt(parseData);
+        ParseData parseData = realParseData(data);
+        byte[] decryptData = decrypt.decrypt(parseData.mData);
+        parseData.mData = decryptData;
+        return parseData;
     }
 
     /**
@@ -101,18 +109,20 @@ public class DataUtils {
      * @param data
      * @return 如果不合法，返回null
      */
-    private static byte[] realParseData(byte[] data) {
+    private static ParseData realParseData(byte[] data) {
         if (data == null ) {
-            return null;
+            return new ParseData();
         }
 
         boolean legal = checkLegal(data);
         if (!legal) {
-            return null;
+            return new ParseData();
         }
+        ParseData parseData = new ParseData();
+        parseData.mRequestId = data[3];
         byte[] newData = getParseData(data);
-
-        return newData;
+        parseData.mData = newData;
+        return parseData;
     }
 
     /**
@@ -161,7 +171,7 @@ public class DataUtils {
      * @type 类型
      * @return
      */
-    private static byte[] addHeadPart(byte[] oldData, @DataType.BtDeviceDataType int type) {
+    private static byte[] addHeadPart(byte[] oldData, @DataType.BtDeviceDataType int type, int requestId) {
         if (oldData == null) {
             return null;
         }
@@ -171,7 +181,7 @@ public class DataUtils {
         newData[0] = sHead;
         newData[1] = (byte) (newLength);
         newData[2] = (byte) type;
-        newData[3] = 0;
+        newData[3] = (byte) requestId;
         newData[4] = 0;
         newData[5] = 0;
         for (int i = 6; i < newData.length - 4; i++) {
@@ -200,7 +210,7 @@ public class DataUtils {
         for (int i = 0; i < length; i++) {
             byteSum = (data[i] & 0xFF) + byteSum;
         }
-        int sum = byteSum % 0xFF;
+        int sum = byteSum % 256;
         return sum;
     }
 }

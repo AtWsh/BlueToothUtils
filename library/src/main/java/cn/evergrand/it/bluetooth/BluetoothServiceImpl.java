@@ -45,7 +45,7 @@ public class BluetoothServiceImpl extends IBluetoothService.Stub implements Hand
         Message msg = mHandler.obtainMessage(code, new BleGeneralResponse() {
 
             @Override
-            public void onResponse(int code, Bundle data) {
+            public void onResponse(int code, Bundle data, int requestId) {
                 if (response != null) {
                     if (data == null) {
                         data = new Bundle();

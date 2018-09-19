@@ -99,7 +99,7 @@ public class BTDListViewHolder extends RecyclerView.ViewHolder {
             }
 
             @Override
-            public void onResponse(int code, BleGattProfile profile) {
+            public void onResponse(int code, BleGattProfile profile, int requestId) {
                 BluetoothLog.v(String.format("profile:\n%s", profile));
                 if (mInConnectionListener != null) {
                     mInConnectionListener.onConnectionSuccess();
@@ -110,6 +110,7 @@ public class BTDListViewHolder extends RecyclerView.ViewHolder {
                     //Intent in = new Intent(mRootView.getContext(), DataOprationActivity.class);
                     //in.putExtra("SearchResult", result);
                     //mRootView.getContext().startActivity(in);
+                    Log.d("wsh_log", "蓝牙连接成功");
                     if (profile == null) {
                         Log.d("wsh", "onResponse:  profile = profile");
                         return;
@@ -132,7 +133,7 @@ public class BTDListViewHolder extends RecyclerView.ViewHolder {
                     Log.d("wsh", "serviceUUID = " + serviceUUID.toString() + "   characterUUID = " + characterUUID.toString());
                     notifyBle(device.getAddress(), serviceUUID, characterUUID, new BleNotifyResponse() {
                         @Override
-                        public void onNotify(UUID service, UUID character, byte[] value) {
+                        public void onNotify(UUID service, UUID character, byte[] value, int requestId) {
                             Log.d("wsh", "onNotify");
                         }
 
