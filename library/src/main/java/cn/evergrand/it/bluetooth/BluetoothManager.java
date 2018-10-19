@@ -55,6 +55,8 @@ public class BluetoothManager {
     private boolean mNeedInterceptPinDialog = false; //是否拦截Pin码提示弹窗
     private int mtu = 20;
     private static int MAX_MTU = 512;
+    private int mMaxRetryConnectTimes = 4;
+    private int mCurrentRetryConnectCount = 0;
 
 
     private BluetoothManager() {}
@@ -122,7 +124,7 @@ public class BluetoothManager {
         }
         if (!mClient.isBluetoothOpened()) {
             mClient.openBluetooth();
-            mHandler.postDelayed(new Runnable() {
+            /*mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (mClient.isBluetoothOpened()) {
@@ -131,8 +133,32 @@ public class BluetoothManager {
                         searchResponse.onSearchError(SearchErrorState.USER_CANCEL_OPEN_BT);
                     }
                 }
-            }, TRY_OPEN_BT_DELAY);
+            }, TRY_OPEN_BT_DELAY);*/
+            postDelayConnect(searchResponse);
         }
+    }
+
+    private void postDelayConnect(final SearchResponse searchResponse) {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mCurrentRetryConnectCount++;
+                if (mClient.isBluetoothOpened()) {
+                    //Log.d("wsh_log","postDelayConnect 蓝牙开关开了  此时为第" + mCurrentRetryConnectCount + "重试");
+                    mCurrentRetryConnectCount = 0;
+                    searchBle(searchResponse);
+                }else {
+                    if (mCurrentRetryConnectCount < mMaxRetryConnectTimes) { //还有重试次数
+                        //Log.d("wsh_log","tryOpenBle mClient.openBluetooth  第" + (mCurrentRetryConnectCount + 1) + "次postDelay");
+                        postDelayConnect(searchResponse);
+                    }else {
+                        //Log.d("wsh_log","postDelayConnect 重试" + mCurrentRetryConnectCount + "次后失败");
+                        mCurrentRetryConnectCount = 0;
+                        searchResponse.onSearchError(SearchErrorState.USER_CANCEL_OPEN_BT);
+                    }
+                }
+            }
+        }, 3000);
     }
 
     /**
