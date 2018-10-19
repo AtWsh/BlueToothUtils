@@ -15,6 +15,8 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         //CbtManager.getInstance().init(this);
+
         BluetoothManager.getInstance().init(this);
+
     }
 }

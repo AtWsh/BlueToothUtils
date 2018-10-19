@@ -456,6 +456,8 @@ public class BTDListActivity extends AppCompatActivity {
 
         BluetoothManager.getInstance().clear();
 
+        BluetoothManager.getInstance().openLog(true);
+
     }
 
     /**
