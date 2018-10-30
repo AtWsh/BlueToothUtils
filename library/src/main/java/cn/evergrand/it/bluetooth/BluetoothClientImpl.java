@@ -12,7 +12,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 
-import com.inuker.bluetooth.library.IBluetoothService;
+import com.inuker.bluetooth.blelibrary.IBluetoothService;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

@@ -7,7 +7,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 
-import com.inuker.bluetooth.library.IResponse;
+import com.inuker.bluetooth.blelibrary.IResponse;
 
 public abstract class BluetoothResponse extends IResponse.Stub implements Handler.Callback {
 

@@ -1,5 +1,5 @@
 // IBleResponse.aidl
-package com.inuker.bluetooth.library;
+package com.inuker.bluetooth.blelibrary;
 
 // Declare any non-default types here with import statements
 

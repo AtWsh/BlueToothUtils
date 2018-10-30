@@ -7,8 +7,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 
-import com.inuker.bluetooth.library.IBluetoothService;
-import com.inuker.bluetooth.library.IResponse;
+import com.inuker.bluetooth.blelibrary.IBluetoothService;
+import com.inuker.bluetooth.blelibrary.IResponse;
 
 import java.util.UUID;
 
